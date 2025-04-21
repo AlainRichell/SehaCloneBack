@@ -50,8 +50,6 @@ class Certificado(models.Model):
         return f"{prefix}{year}{month}{day}{random_digits}"
 
     def clean(self):
-        if self.fecha_inicio is None or self.fecha_salida is None:
-            raise ValidationError("يجب إدخال تاريخ البدء وتاريخ الانتهاء")
         if self.fecha_salida <= self.fecha_inicio:
             raise ValidationError("يجب أن يكون تاريخ البدء بعد تاريخ الانتهاء")
     
