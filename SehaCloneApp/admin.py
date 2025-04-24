@@ -39,7 +39,7 @@ class CentroMedicoAdmin(admin.ModelAdmin):
 class CertificadoAdmin(admin.ModelAdmin):
     list_display = ('codigo', 'nombre_paciente', 'centro_medico', 'fecha_inicio', 'fecha_salida', 'print_certificate')
     search_fields = ('codigo', 'nombre_paciente', 'identificacion')
-    readonly_fields = ('codigo', 'fecha_creacion')
+    readonly_fields = ('codigo', 'fecha_creacion', 'duracion', 'fecha_inicio_lunar', 'fecha_salida_lunar')
 
     def print_certificate(self, obj):
         url = reverse('print_certificate', args=[obj.id])

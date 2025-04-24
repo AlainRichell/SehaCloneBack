@@ -2,6 +2,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 import random
 from datetime import datetime
+from hijri_converter import convert
 
 class CentroMedico(models.Model):
     nombre = models.CharField(max_length=100, verbose_name="اسم" )
@@ -25,14 +26,21 @@ class Certificado(models.Model):
         verbose_name="المركز الطبي"
     )
     nombre_paciente = models.CharField(max_length=100, verbose_name="اسم المريض")
+    nombre_paciente_ingles = models.CharField(max_length=100, verbose_name="Patient Name", blank=True, null=True)
     identificacion = models.CharField(max_length=50, db_index=True, verbose_name="الهوية / الإقامة")
     codigo = models.CharField(max_length=50, unique=True, db_index=True, verbose_name="رمز الإجازة")
     nacionalidad = models.CharField(max_length=50, verbose_name="جنسية")
+    nacionalidad_ingles = models.CharField(max_length=50, verbose_name="Nationality", blank=True, null=True)
     centro_servicio = models.CharField(max_length=100, verbose_name="مركز الخدمة")
+    centro_servicio_ingles = models.CharField(max_length=100, verbose_name="Service Center", blank=True, null=True)
     nombre_medico = models.CharField(max_length=100, verbose_name="اسم الطبيب")
+    nombre_medico_ingles = models.CharField(max_length=100, verbose_name="Doctor Name", blank=True, null=True)
     titulo_trabajo = models.CharField(max_length=100, verbose_name="مسمى وظيفي")
+    titulo_trabajo_ingles = models.CharField(max_length=100, verbose_name="Job Title", blank=True, null=True)
     fecha_inicio = models.DateField(verbose_name="تاريخ البدء")
     fecha_salida = models.DateField(verbose_name="تاريخ الانتهاء")
+    fecha_inicio_lunar = models.DateField(verbose_name="تاريخ البدء القمري", blank=True, null=True)
+    fecha_salida_lunar = models.DateField(verbose_name="تاريخ الانتهاء القمري", blank=True, null=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الإنشاء")
     duracion = models.IntegerField(blank=True, null=True, verbose_name="مدة")
 
@@ -67,6 +75,15 @@ class Certificado(models.Model):
         if not self.duracion:
             delta = self.fecha_salida - self.fecha_inicio
             self.duracion = delta.days
+        
+        # Convert Gregorian dates to Hijri
+        if self.fecha_inicio and not self.fecha_inicio_lunar:
+            hijri_date = convert.Gregorian(self.fecha_inicio.year, self.fecha_inicio.month, self.fecha_inicio.day).to_hijri()
+            self.fecha_inicio_lunar = datetime(hijri_date.year, hijri_date.month, hijri_date.day).date()
+            
+        if self.fecha_salida and not self.fecha_salida_lunar:
+            hijri_date = convert.Gregorian(self.fecha_salida.year, self.fecha_salida.month, self.fecha_salida.day).to_hijri()
+            self.fecha_salida_lunar = datetime(hijri_date.year, hijri_date.month, hijri_date.day).date()
         
         self.full_clean()
         super().save(*args, **kwargs)
