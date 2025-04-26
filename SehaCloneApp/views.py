@@ -26,6 +26,7 @@ from bidi.algorithm import get_display
 import unicodedata
 import qrcode
 from io import BytesIO as BytesIO2
+from reportlab.lib.pagesizes import A4
 
 # Set locale to English
 locale.setlocale(locale.LC_TIME, 'en_US.UTF-8')
@@ -79,12 +80,8 @@ def print_certificate(request, certificado_id):
     # Create a file-like buffer to receive PDF data
     buffer = BytesIO()
 
-    # Create custom page size (letter width x 1.3 times letter height)
-    letter_width, letter_height = letter
-    custom_page_size = (letter_width, letter_height * 1.3)
-
     # Create the PDF object, using the buffer as its "file."
-    doc = SimpleDocTemplate(buffer, pagesize=custom_page_size, leftMargin=0.5*inch, rightMargin=0.5*inch, topMargin=0, bottomMargin=0.5*inch)
+    doc = SimpleDocTemplate(buffer, pagesize=A4, leftMargin=0.5*inch, rightMargin=0.5*inch, topMargin=0, bottomMargin=0.5*inch)
     elements = []
 
     # Define colors
