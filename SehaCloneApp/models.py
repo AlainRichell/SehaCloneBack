@@ -60,8 +60,8 @@ class Certificado(models.Model):
     def clean(self):
         if self.fecha_inicio is None or self.fecha_salida is None:
             raise ValidationError("يجب إدخال تاريخ البدء وتاريخ الانتهاء")
-        if self.fecha_salida <= self.fecha_inicio:
-            raise ValidationError("يجب أن يكون تاريخ البدء بعد تاريخ الانتهاء")
+        if self.fecha_salida < self.fecha_inicio:
+            raise ValidationError("يجب أن يكون تاريخ الانتهاء بعد أو يساوي تاريخ البدء")
     
     def save(self, *args, **kwargs):
         if not self.codigo:
@@ -72,9 +72,9 @@ class Certificado(models.Model):
                     break
         
         # Calculate duration if not provided
-        if not self.duracion:
+        if not self.duracion and self.fecha_inicio and self.fecha_salida:
             delta = self.fecha_salida - self.fecha_inicio
-            self.duracion = delta.days
+            self.duracion = delta.days + 1
         
         # Convert Gregorian dates to Hijri
         if self.fecha_inicio and not self.fecha_inicio_lunar:
