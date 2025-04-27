@@ -72,16 +72,16 @@ class Certificado(models.Model):
                     break
         
         # Calculate duration if not provided
-        if not self.duracion and self.fecha_inicio and self.fecha_salida:
+        if self.fecha_inicio and self.fecha_salida:
             delta = self.fecha_salida - self.fecha_inicio
             self.duracion = delta.days + 1
         
         # Convert Gregorian dates to Hijri
-        if self.fecha_inicio and not self.fecha_inicio_lunar:
+        if self.fecha_inicio:
             hijri_date = convert.Gregorian(self.fecha_inicio.year, self.fecha_inicio.month, self.fecha_inicio.day).to_hijri()
             self.fecha_inicio_lunar = datetime(hijri_date.year, hijri_date.month, hijri_date.day).date()
             
-        if self.fecha_salida and not self.fecha_salida_lunar:
+        if self.fecha_salida:
             hijri_date = convert.Gregorian(self.fecha_salida.year, self.fecha_salida.month, self.fecha_salida.day).to_hijri()
             self.fecha_salida_lunar = datetime(hijri_date.year, hijri_date.month, hijri_date.day).date()
         
