@@ -89,6 +89,7 @@ def print_certificate(request, certificado_id):
     LIGHT_BLUE_COLOR = HexColor('#3073b5')  # Slightly lighter blue for column 1 and 4
     LIGHT_GRAY = HexColor('#f5f5f5')  # Light gray for alternating rows
     BORDER_GRAY = HexColor('#d0d0d0')  # Gray for borders
+    LINK_COLOR = HexColor('#0000EE')
 
     # Add styles
     styles = getSampleStyleSheet()
@@ -96,7 +97,7 @@ def print_certificate(request, certificado_id):
         'CellStyle',
         parent=styles['Normal'],
         fontSize=8,
-        leading=12,
+        leading=14,
         fontName='NotoSansArabic',
         alignment=1,  # Center alignment
         textColor=BLUE_COLOR
@@ -105,7 +106,7 @@ def print_certificate(request, certificado_id):
     title_style = ParagraphStyle(
         'TitleStyle',
         parent=cell_style,
-        fontName='NotoSansArabic-Bold',
+        fontName='NotoSansArabic',
         textColor=LIGHT_BLUE_COLOR  # Lighter blue for column 1 titles
     )
 
@@ -113,6 +114,7 @@ def print_certificate(request, certificado_id):
         'RTLTitleStyle',
         parent=title_style,
         alignment=1,  # Center alignment
+        fontSize=9,
         textColor=LIGHT_BLUE_COLOR  # Lighter blue for column 4 titles
     )
     
@@ -164,8 +166,46 @@ def print_certificate(request, certificado_id):
         fontName='NotoSansArabic-Bold'
     )
 
+    link_style = ParagraphStyle(
+    'NormalText',
+    parent=styles['Normal'],
+    fontSize=8,
+    leading=14,
+    fontName='NotoSansArabic',
+    alignment=1,
+    textColor=LINK_COLOR
+    )
+
+    left_content_english_style = ParagraphStyle(
+    'NormalText',
+    parent=styles['Normal'],
+    fontSize=8,
+    leading=14,
+    fontName='NotoSansArabic',
+    alignment=1,
+    )
+
+    left_content_english2_style = ParagraphStyle(
+    'NormalText',
+    parent=styles['Normal'],
+    fontSize=7,
+    leading=10,
+    fontName='NotoSansArabic',
+    alignment=1,
+    )
+
+    left_content_english3_style = ParagraphStyle(
+    'NormalText',
+    parent=styles['Normal'],
+    fontSize=7,
+    leading=10,
+    fontName='NotoSansArabic-Bold',
+    alignment=1,
+    textColor=BLUE_COLOR
+    )
+
     # Define verification link
-    VERIFICATION_LINK = "https://sehaclonefront.onrender.com/leave-query"
+    VERIFICATION_LINK = "sehaclonefront.onrender.com/leave-query"
 
     def reshape_rtl_text(text):
         """Reshape and reverse Arabic text for RTL rendering"""
@@ -207,55 +247,55 @@ def print_certificate(request, certificado_id):
     # Create certificate data
     data = [
         [Paragraph('Leave ID', title_style), 
-         Paragraph(certificado.codigo, cell_style), 
-         Paragraph(certificado.codigo, cell_style),  # No RTL for Leave ID
+         Paragraph(certificado.codigo or '', cell_style), 
+         Paragraph(certificado.codigo or '', cell_style),  # No RTL for Leave ID
          Paragraph(reshape_rtl_text('رمز الإجازة'), rtl_title_style)],
         [Paragraph('Leave Duration', white_title_style), 
-         Paragraph(f'7 day ({certificado.fecha_inicio.strftime("%d-%m-%Y")} to {certificado.fecha_salida.strftime("%d-%m-%Y")})', white_cell_style), 
-         Paragraph(reshape_rtl_text(f'7 يوم ({certificado.fecha_inicio_lunar.strftime("%d-%m-%Y") if certificado.fecha_inicio_lunar else certificado.fecha_inicio.strftime("%d-%m-%Y")} الى {certificado.fecha_salida_lunar.strftime("%d-%m-%Y") if certificado.fecha_salida_lunar else certificado.fecha_salida.strftime("%d-%m-%Y")})'), white_cell_style_rtl), 
+         Paragraph(f'7 day ({certificado.fecha_inicio.strftime("%d-%m-%Y") or ''} to {certificado.fecha_salida.strftime("%d-%m-%Y") or ''})', white_cell_style), 
+         Paragraph(reshape_rtl_text(f'7 يوم ({certificado.fecha_inicio_lunar.strftime("%Y-%m-%d") or ''} الى {certificado.fecha_salida_lunar.strftime("%Y-%m-%d") or ''})'), white_cell_style_rtl), 
          Paragraph(reshape_rtl_text('مدة الإجازة'), white_title_style_rtl)],
         [Paragraph('Admission Date', title_style), 
-         Paragraph(certificado.fecha_inicio.strftime('%d-%m-%Y'), cell_style), 
-         Paragraph(reshape_rtl_text(certificado.fecha_inicio_lunar.strftime('%d-%m-%Y') if certificado.fecha_inicio_lunar else certificado.fecha_inicio.strftime('%d-%m-%Y')), cell_style_rtl), 
+         Paragraph(certificado.fecha_inicio.strftime('%d-%m-%Y') or '', cell_style), 
+         Paragraph(reshape_rtl_text(certificado.fecha_inicio_lunar.strftime('%d-%m-%Y') or ''), cell_style_rtl), 
          Paragraph(reshape_rtl_text('تاريخ الدخول'), rtl_title_style)],
         [Paragraph('Discharge Date', title_style), 
-         Paragraph(certificado.fecha_salida.strftime('%d-%m-%Y'), cell_style), 
-         Paragraph(reshape_rtl_text(certificado.fecha_salida_lunar.strftime('%d-%m-%Y') if certificado.fecha_salida_lunar else certificado.fecha_salida.strftime('%d-%m-%Y')), cell_style_rtl), 
+         Paragraph(certificado.fecha_salida.strftime('%d-%m-%Y') or '', cell_style), 
+         Paragraph(reshape_rtl_text(certificado.fecha_salida_lunar.strftime('%d-%m-%Y') or ''), cell_style_rtl), 
          Paragraph(reshape_rtl_text('تاريخ الخروج'), rtl_title_style)],
         [Paragraph('Issue Date', title_style), 
-         Paragraph(certificado.fecha_creacion.strftime('%d-%m-%Y'), cell_style), 
-         Paragraph(certificado.fecha_creacion.strftime('%d-%m-%Y'), cell_style),  # No RTL for Issue Date
+         Paragraph(certificado.fecha_creacion.strftime('%d-%m-%Y') or '', cell_style), 
+         Paragraph(certificado.fecha_creacion.strftime('%d-%m-%Y') or '', cell_style),  # No RTL for Issue Date
          Paragraph(reshape_rtl_text('تاريخ إصدار التقرير'), rtl_title_style)],
         [Paragraph('Name', title_style), 
-         Paragraph(certificado.nombre_paciente_ingles or certificado.nombre_paciente, cell_style), 
-         Paragraph(reshape_rtl_text(certificado.nombre_paciente), cell_style_rtl), 
+         Paragraph(certificado.nombre_paciente_ingles or '', cell_style), 
+         Paragraph(reshape_rtl_text(certificado.nombre_paciente or ''), cell_style_rtl), 
          Paragraph(reshape_rtl_text('الاسم'), rtl_title_style)],
         [Paragraph('National ID / Iqama', title_style), 
-         Paragraph(certificado.identificacion, cell_style), 
-         Paragraph(certificado.identificacion, cell_style),  # No RTL for Iqama
+         Paragraph(certificado.identificacion or '', cell_style), 
+         Paragraph(certificado.identificacion or '', cell_style),  # No RTL for Iqama
          Paragraph(reshape_rtl_text('رقم الهوية / الإقامة'), rtl_title_style)],
         [Paragraph('Nationality', title_style), 
-         Paragraph(certificado.nacionalidad_ingles or certificado.nacionalidad, cell_style), 
-         Paragraph(reshape_rtl_text(certificado.nacionalidad), cell_style_rtl), 
+         Paragraph(certificado.nacionalidad_ingles or '', cell_style), 
+         Paragraph(reshape_rtl_text(certificado.nacionalidad or ''), cell_style_rtl), 
          Paragraph(reshape_rtl_text('الجنسية'), rtl_title_style)],
         [Paragraph('Employer', title_style), 
-         Paragraph(certificado.centro_servicio_ingles or certificado.centro_servicio, cell_style), 
-         Paragraph(reshape_rtl_text(certificado.centro_servicio), cell_style_rtl), 
+         Paragraph(certificado.centro_servicio_ingles or '', cell_style), 
+         Paragraph(reshape_rtl_text(certificado.centro_servicio or ''), cell_style_rtl), 
          Paragraph(reshape_rtl_text('جهة العمل'), rtl_title_style)],
         [Paragraph('Physician Name', title_style), 
-         Paragraph(certificado.nombre_medico_ingles or certificado.nombre_medico, cell_style), 
-         Paragraph(reshape_rtl_text(certificado.nombre_medico), cell_style_rtl), 
+         Paragraph(certificado.nombre_medico_ingles or '', cell_style), 
+         Paragraph(reshape_rtl_text(certificado.nombre_medico or ''), cell_style_rtl), 
          Paragraph(reshape_rtl_text('اسم الطبيب المعالج'), rtl_title_style)],
         [Paragraph('Position', title_style), 
-         Paragraph(certificado.titulo_trabajo_ingles or certificado.titulo_trabajo, cell_style), 
-         Paragraph(reshape_rtl_text(certificado.titulo_trabajo), cell_style_rtl), 
+         Paragraph(certificado.titulo_trabajo_ingles or '', cell_style), 
+         Paragraph(reshape_rtl_text(certificado.titulo_trabajo or ''), cell_style_rtl), 
          Paragraph(reshape_rtl_text('المسمى الوظيفي'), rtl_title_style)]
     ]
 
     # Create table with adjusted column widths (narrower outer columns)
     total_width = doc.width
-    outer_col_width = total_width * 0.2  # 20% for title columns
-    inner_col_width = total_width * 0.3  # 30% for value columns
+    outer_col_width = total_width * 0.15  # 20% for title columns
+    inner_col_width = total_width * 0.35  # 30% for value columns
     table = Table(data, colWidths=[outer_col_width, inner_col_width, inner_col_width, outer_col_width])
 
     # Define table styles
@@ -273,8 +313,8 @@ def print_certificate(request, certificado_id):
         ('FONTSIZE', (0, 0), (-1, -1), 8),
         
         # Borders
-        ('GRID', (0, 0), (-1, -1), 1, BORDER_GRAY),
-        ('ROUNDEDCORNERS', [10, 10, 10, 10]),
+        ('GRID', (0, 0), (-1, -1), 0.5, BORDER_GRAY),
+        ('ROUNDEDCORNERS', [6, 6, 6, 6]),
         
         # Row colors
         ('BACKGROUND', (0, 1), (-1, 1), BLUE_COLOR),  # Leave Duration row in blue
@@ -288,6 +328,15 @@ def print_certificate(request, certificado_id):
         # Padding
         ('TOPPADDING', (0, 0), (-1, -1), 6),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+
+        # Aumentar padding vertical
+        ('TOPPADDING', (0, 0), (-1, -1), 8),  # Aumentado de 6 a 10
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),  # Aumentado de 6 a 10
+        ('LEFTPADDING', (0, 0), (-1, -1), 2),  # Añadir padding horizontal
+        ('RIGHTPADDING', (0, 0), (-1, -1), 2),  # Añadir padding horizontal
+        
+        # Aumentar espacio entre líneas en el contenido
+        ('LEADING', (0, 0), (-1, -1), 14),  # Añadir espacio entre líneas
     ]
 
     # Add alternating row colors (inverted)
@@ -299,14 +348,17 @@ def print_certificate(request, certificado_id):
     elements.append(table)
     elements.append(Spacer(1, 20))
 
-    # Calculate the remaining space on each side
-    table_width = sum([outer_col_width * 2, inner_col_width * 2])
-    remaining_width = doc.width - table_width
-    side_margin = remaining_width / 2
+    ############################################# INFO SECTION ########################################################
 
-    # Create two columns for company info and verification link
-    left_content = []
-    right_content = []
+    # Calculate the remaining space on each side
+    # Calculate the total width of the document and margins
+    doc_width = doc.width
+    side_margin = 1  # Small margin on each side, adjust as needed
+    usable_width = doc_width - 2 * side_margin
+
+    # Define column widths to center the separator
+    center_col_width = 50  # Minimum width for the center column with the separator
+    outer_col_width = (usable_width - center_col_width) / 2  # Equal width for left and right columns
 
     # Generate QR code
     qr = qrcode.QRCode(
@@ -318,14 +370,14 @@ def print_certificate(request, certificado_id):
     qr.add_data(VERIFICATION_LINK)
     qr.make(fit=True)
     qr_img = qr.make_image(fill_color="black", back_color="white")
-    
+
     # Save QR code to BytesIO
     qr_buffer = BytesIO2()
     qr_img.save(qr_buffer, format='PNG')
     qr_buffer.seek(0)
-    
+
     # Create QR image with fixed size
-    qr_image = Image(qr_buffer, width=0.75*inch, height=0.75*inch)
+    qr_image = Image(qr_buffer, width=1*inch, height=1*inch)
     qr_image.hAlign = 'CENTER'
 
     # Prepare center icon
@@ -334,7 +386,7 @@ def print_certificate(request, certificado_id):
         with PILImage.open(certificado.centro_medico.icono.path) as img:
             img_width, img_height = img.size
             aspect_ratio = img_width / img_height
-            icon_height = 0.75*inch  # Reduced from 1.5 to 0.75
+            icon_height = 0.75*inch
             icon_width = icon_height * aspect_ratio
             
             center_icon = Image(certificado.centro_medico.icono.path, width=icon_width, height=icon_height)
@@ -345,46 +397,53 @@ def print_certificate(request, certificado_id):
         # Row 1: QR and Center Icon
         [
             qr_image,
+            '',
             center_icon if center_icon else ''
         ],
         # Row 2: Verification info and Center Name
         [
-            Paragraph(reshape_rtl_text("للتأكد من صحة بيانات التقرير، يرجى زيارة الموقع الرسمي لهيئة الصحة."), normal_style),
-            Paragraph(reshape_rtl_text(certificado.centro_medico.nombre or ''), bold_style)
+            Paragraph(reshape_rtl_text("ﻟﻠﺘﺤﻘﻖ ﻣﻦ ﺑﻴﺎﻧﺎت اﻟﺘﻘﺮﻳﺮ ﻳﺮﺟﻰ اﻟﺘﺄﻛﺪ ﻣﻦ زﻳﺎرة ﻣﻮﻗﻊ ﻣﻨﺼﺔ ﺻﺤﺔ اﻟﺮﺳﻤﻲ"), left_content_english_style),
+            '',
+            Paragraph(reshape_rtl_text(certificado.centro_medico.nombre or ''), left_content_english3_style)
         ],
         # Row 3: Verification link and Center Description
         [
-            Paragraph(VERIFICATION_LINK, normal_style),
-            Paragraph(reshape_rtl_text(certificado.centro_medico.descripcion or ''), normal_style)
+            Paragraph(("To check the report please visit Seha's official website"), left_content_english2_style),
+            '',
+            Paragraph(reshape_rtl_text(certificado.centro_medico.descripcion or ''), left_content_english3_style)
+        ],
+        # Row 4: Verification link and license
+        [
+            Paragraph(VERIFICATION_LINK, link_style),
+            '',
+            ''
         ]
     ]
 
-    # Create table with equal column widths
-    info_table = Table(table_data, colWidths=[doc.width/2, doc.width/2])
-    
+    # Create table with adjusted column widths
+    info_table = Table(table_data, colWidths=[outer_col_width, center_col_width, outer_col_width])
+
     # Style the table
     info_table.setStyle(TableStyle([
         # General alignment
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        
+
+        # Remove horizontal padding in outer columns
+        ('LEFTPADDING', (0, 0), (0, -1), 0),
+        ('RIGHTPADDING', (2, 0), (2, -1), 0),
+
         # Row heights
-        ('TOPPADDING', (0, 0), (-1, 0), 5),  # First row
+        ('TOPPADDING', (0, 0), (-1, 0), 5),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 5),
-        ('TOPPADDING', (0, 1), (-1, 1), 5),  # Second row
-        ('BOTTOMPADDING', (0, 1), (-1, 1), 2),  # Reduced bottom padding for second row
-        ('TOPPADDING', (0, 2), (-1, 2), 2),  # Reduced top padding for third row
-        ('BOTTOMPADDING', (0, 2), (-1, 2), 5),  # Third row
-        
-        # Cell padding - 0.5 inch on each side of each column
-        ('LEFTPADDING', (0, 0), (0, -1), 0.5*inch),  # Left padding for left column
-        ('RIGHTPADDING', (0, 0), (0, -1), 0.5*inch),  # Right padding for left column
-        ('LEFTPADDING', (1, 0), (1, -1), 0.5*inch),   # Left padding for right column
-        ('RIGHTPADDING', (1, 0), (1, -1), 0.5*inch),  # Right padding for right column
+        ('TOPPADDING', (0, 1), (-1, 1), 1),
+        ('BOTTOMPADDING', (0, 1), (-1, 1), 1),
+        ('TOPPADDING', (0, 2), (-1, 2), 1),
+        ('BOTTOMPADDING', (0, 2), (-1, 2), 1),
     ]))
 
     # Add the table with proper margins
-    margin_table = Table([[info_table]], colWidths=[doc.width])
+    margin_table = Table([[info_table]], colWidths=[doc_width])
     margin_table.setStyle(TableStyle([
         ('LEFTPADDING', (0, 0), (0, 0), side_margin),
         ('RIGHTPADDING', (0, 0), (0, 0), side_margin),
@@ -398,19 +457,21 @@ def print_certificate(request, certificado_id):
     elements.append(margin_table)
     elements.append(Spacer(1, 20))
 
+    ############################################## FOOT SECTION ################################################################
+
     # Bottom section with creation time and signature
     fecha = certificado.fecha_creacion
     hora_str = f"{fecha.strftime('%H:%M %p')}"
     fecha_str = f"{fecha.strftime('%A, %d %B %Y')}"
     
-    # Create time/date style with left alignment and bold
+    # Create time/date style with left alignment
     left_style = ParagraphStyle(
         'LeftStyle',
         parent=normal_style,
         alignment=0,  # 0 = TA_LEFT
         fontSize=8,
         leading=10,
-        fontName='NotoSansArabic-Bold'
+        fontName='NotoSansArabic'
     )
     
     # Create signature image if it exists
@@ -419,7 +480,7 @@ def print_certificate(request, certificado_id):
         with PILImage.open(os.path.join(settings.MEDIA_ROOT, 'signature.jpeg')) as img:
             width, height = img.size
             aspect_ratio = width / height
-            target_height = 0.5*inch
+            target_height = 0.6*inch
             target_width = target_height * aspect_ratio
             signature = Image(os.path.join(settings.MEDIA_ROOT, 'signature.jpeg'), 
                             width=target_width, height=target_height)
