@@ -461,7 +461,7 @@ def print_certificate(request, certificado_id):
 
     # Bottom section with creation time and signature
     fecha = certificado.fecha_creacion
-    hora_str = f"{fecha.strftime('%H:%M %p')}"
+    hora_str = f"{fecha.strftime('%I:%M %p')}"
     fecha_str = f"{fecha.strftime('%A, %d %B %Y')}"
     
     # Create time/date style with left alignment
