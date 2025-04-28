@@ -41,7 +41,7 @@ class Certificado(models.Model):
     fecha_salida = models.DateField(verbose_name="تاريخ الانتهاء")
     fecha_inicio_lunar = models.DateField(verbose_name="تاريخ البدء القمري", blank=True, null=True)
     fecha_salida_lunar = models.DateField(verbose_name="تاريخ الانتهاء القمري", blank=True, null=True)
-    fecha_creacion = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الإنشاء")
+    fecha_creacion = models.DateTimeField(verbose_name="تاريخ الإنشاء")
     duracion = models.IntegerField(blank=True, null=True, verbose_name="مدة")
 
     class Meta:
@@ -60,6 +60,8 @@ class Certificado(models.Model):
     def clean(self):
         if self.fecha_inicio is None or self.fecha_salida is None:
             raise ValidationError("يجب إدخال تاريخ البدء وتاريخ الانتهاء")
+        if self.fecha_creacion is None or self.fecha_creacion.date() < self.fecha_inicio:
+            raise ValidationError("تاريخ الإنشاء غير صحيح، يجب أن يكون تاريخ الإنشاء مساويًا أو أكبر من تاريخ البدء")
         if self.fecha_salida < self.fecha_inicio:
             raise ValidationError("يجب أن يكون تاريخ الانتهاء بعد أو يساوي تاريخ البدء")
     
