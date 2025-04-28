@@ -251,8 +251,8 @@ def print_certificate(request, certificado_id):
          Paragraph(certificado.codigo or '', cell_style),  # No RTL for Leave ID
          Paragraph(reshape_rtl_text('رمز الإجازة'), rtl_title_style)],
         [Paragraph('Leave Duration', white_title_style), 
-         Paragraph(f'7 day ({certificado.fecha_inicio.strftime("%d-%m-%Y")} to {certificado.fecha_salida.strftime("%d-%m-%Y")})', white_cell_style), 
-         Paragraph(reshape_rtl_text(f'7 يوم ({certificado.fecha_inicio_lunar.strftime("%Y-%m-%d")} الى {certificado.fecha_salida_lunar.strftime("%Y-%m-%d")})'), white_cell_style_rtl), 
+         Paragraph(f'{certificado.duracion} day ({certificado.fecha_inicio.strftime("%d-%m-%Y")} to {certificado.fecha_salida.strftime("%d-%m-%Y")})', white_cell_style), 
+         Paragraph(reshape_rtl_text(f'{certificado.duracion} يوم ({certificado.fecha_inicio_lunar.strftime("%Y-%m-%d")} الى {certificado.fecha_salida_lunar.strftime("%Y-%m-%d")})'), white_cell_style_rtl), 
          Paragraph(reshape_rtl_text('مدة الإجازة'), white_title_style_rtl)],
         [Paragraph('Admission Date', title_style), 
          Paragraph(certificado.fecha_inicio.strftime('%d-%m-%Y') or '', cell_style), 
@@ -416,7 +416,7 @@ def print_certificate(request, certificado_id):
         [
             Paragraph(VERIFICATION_LINK, link_style),
             '',
-            ''
+            Paragraph(reshape_rtl_text(f"ﺮﻗﻢ اﻟﺘﺮﺧﻴﺺ: {certificado.centro_medico.numero_licencia}"), left_content_english3_style) if certificado.centro_medico.numero_licencia else ''
         ]
     ]
 
