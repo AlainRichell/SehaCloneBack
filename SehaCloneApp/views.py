@@ -198,7 +198,6 @@ def print_certificate(request, certificado_id):
     leading=10,
     fontName='NotoSansArabic-Bold',
     alignment=1,
-    textColor=BLUE_COLOR
     )
 
     # Define verification link
@@ -248,8 +247,8 @@ def print_certificate(request, certificado_id):
          Paragraph(certificado.codigo or '', cell_style),  # No RTL for Leave ID
          Paragraph(reshape_rtl_text('رمز الإجازة'), rtl_title_style)],
         [Paragraph('Leave Duration', white_title_style), 
-         Paragraph(f'{certificado.duracion} day ({certificado.fecha_inicio.strftime("%d-%m-%Y")} to {certificado.fecha_salida.strftime("%d-%m-%Y")})', white_cell_style), 
-         Paragraph(reshape_rtl_text(f'{certificado.duracion} يوم ({certificado.fecha_inicio_lunar.strftime("%Y-%m-%d")} الى {certificado.fecha_salida_lunar.strftime("%Y-%m-%d")})'), white_cell_style_rtl), 
+         Paragraph(f'{certificado.duracion} {"day" if certificado.duracion == 1 else "days"} ({certificado.fecha_inicio.strftime("%d-%m-%Y")} to {certificado.fecha_salida.strftime("%d-%m-%Y")})', white_cell_style), 
+         Paragraph(reshape_rtl_text(f'{certificado.duracion} {"يوم" if certificado.duracion == 1 else "أيام"} ({certificado.fecha_inicio_lunar.strftime("%Y-%m-%d")} الى {certificado.fecha_salida_lunar.strftime("%Y-%m-%d")})'), white_cell_style_rtl), 
          Paragraph(reshape_rtl_text('مدة الإجازة'), white_title_style_rtl)],
         [Paragraph('Admission Date', title_style), 
          Paragraph(certificado.fecha_inicio.strftime('%d-%m-%Y') or '', cell_style), 
