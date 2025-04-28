@@ -201,7 +201,8 @@ def print_certificate(request, certificado_id):
     )
 
     # Define verification link
-    VERIFICATION_LINK = "sehaclonefront.onrender.com/leave-query"
+    REAL_VERIFICATION_LINK = "https://sehaclonefront.onrender.com/leave-query"
+    DISPLAY_VERIFICATION_TEXT = "www.seha.sa/#/inquiries/slenquiry"
 
     def reshape_rtl_text(text):
         """Reshape and reverse Arabic text for RTL rendering"""
@@ -362,7 +363,7 @@ def print_certificate(request, certificado_id):
         box_size=10,
         border=4,
     )
-    qr.add_data(VERIFICATION_LINK)
+    qr.add_data(REAL_VERIFICATION_LINK)
     qr.make(fit=True)
     qr_img = qr.make_image(fill_color="black", back_color="white")
 
@@ -423,7 +424,7 @@ def print_certificate(request, certificado_id):
         ],
         # Fila 4: Mantener estructura para el link
         [
-            Paragraph(VERIFICATION_LINK, link_style),
+            Paragraph(f'<a href="{REAL_VERIFICATION_LINK}">{DISPLAY_VERIFICATION_TEXT}</a>', link_style),
             '',
             ''  # Celda vacía
         ]
