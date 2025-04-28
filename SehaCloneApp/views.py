@@ -5,18 +5,14 @@ from rest_framework import status
 from .models import CentroMedico, Certificado
 from .serializers import CentroMedicoSerializer, CertificadoSerializer, UserRegistrationSerializer
 from django.http import HttpResponse
-from django.template.loader import render_to_string
 from django.conf import settings
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter, A4
-from reportlab.lib import colors
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image, Frame, PageTemplate, BaseDocTemplate
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from io import BytesIO
-from datetime import datetime
 import os
 from PIL import Image as PILImage
 import locale
@@ -27,6 +23,7 @@ import unicodedata
 import qrcode
 from io import BytesIO as BytesIO2
 from reportlab.lib.pagesizes import A4
+import pytz
 
 # Set locale to English
 locale.setlocale(locale.LC_TIME, 'en_US.UTF-8')
@@ -350,7 +347,6 @@ def print_certificate(request, certificado_id):
 
     ############################################# INFO SECTION ########################################################
 
-    # Calculate the remaining space on each side
     # Calculate the total width of the document and margins
     doc_width = doc.width
     side_margin = 1  # Small margin on each side, adjust as needed
@@ -461,8 +457,10 @@ def print_certificate(request, certificado_id):
 
     # Bottom section with creation time and signature
     fecha = certificado.fecha_creacion
-    hora_str = f"{fecha.strftime('%I:%M %p')}"
-    fecha_str = f"{fecha.strftime('%A, %d %B %Y')}"
+    # Convertir a Asia/Riyadh
+    fecha_riyadh = fecha.astimezone(pytz.timezone('Asia/Riyadh'))
+    hora_str = f"{fecha_riyadh.strftime('%I:%M %p')}"
+    fecha_str = f"{fecha_riyadh.strftime('%A, %d %B %Y')}"
     
     # Create time/date style with left alignment
     left_style = ParagraphStyle(
