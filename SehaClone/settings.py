@@ -104,7 +104,7 @@ REST_FRAMEWORK = {
 
 LANGUAGE_CODE = 'ar-sa'
 
-TIME_ZONE = 'Europe/Madrid'
+TIME_ZONE = 'Asia/Riyadh'
 
 USE_I18N = True
 
