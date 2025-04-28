@@ -195,7 +195,7 @@ def print_certificate(request, certificado_id):
     'NormalText',
     parent=styles['Normal'],
     fontSize=7,
-    leading=10,
+    leading=8,  # Reducido de 10 a 8 para menos espacio entre líneas
     fontName='NotoSansArabic-Bold',
     alignment=1,
     )
@@ -387,33 +387,47 @@ def print_certificate(request, certificado_id):
             center_icon = Image(certificado.centro_medico.icono.path, width=icon_width, height=icon_height)
             center_icon.hAlign = 'CENTER'
 
+    # 1) Collect your raw text lines
+    lines = []
+    if certificado.centro_medico.nombre:
+        lines.append(certificado.centro_medico.nombre)
+    if certificado.centro_medico.descripcion:
+        lines.append(certificado.centro_medico.descripcion)
+    if certificado.centro_medico.numero_licencia:
+        lines.append(f"ﺮﻗﻢ اﻟﺘﺮﺧﻴﺺ: {certificado.centro_medico.numero_licencia}")
+
+    cell_flowables = []
+    for line in lines:
+        cell_flowables.append(Paragraph(reshape_rtl_text(line), left_content_english3_style))
+        cell_flowables.append(Spacer(1, 2))
+
     # Create table data
     table_data = [
-        # Row 1: QR and Center Icon
+    # Fila 1: QR y Icono
         [
             qr_image,
             '',
             center_icon if center_icon else ''
         ],
-        # Row 2: Verification info and Center Name
+        # Fila 2: Contenido combinado en columna 3
         [
             Paragraph(reshape_rtl_text("ﻟﻠﺘﺤﻘﻖ ﻣﻦ ﺑﻴﺎﻧﺎت اﻟﺘﻘﺮﻳﺮ ﻳﺮﺟﻰ اﻟﺘﺄﻛﺪ ﻣﻦ زﻳﺎرة ﻣﻮﻗﻊ ﻣﻨﺼﺔ ﺻﺤﺔ اﻟﺮﺳﻤﻲ"), left_content_english_style),
             '',
-            Paragraph(reshape_rtl_text(certificado.centro_medico.nombre or ''), left_content_english3_style)
+            cell_flowables
         ],
-        # Row 3: Verification link and Center Description
+        # Fila 3: Mantener estructura para otras columnas
         [
-            Paragraph(("To check the report please visit Seha's official website"), left_content_english2_style),
+            Paragraph("To check the report please visit Seha's official website", left_content_english2_style),
             '',
-            Paragraph(reshape_rtl_text(certificado.centro_medico.descripcion or ''), left_content_english3_style)
+            ''  # Celda vacía
         ],
-        # Row 4: Verification link and license
+        # Fila 4: Mantener estructura para el link
         [
             Paragraph(VERIFICATION_LINK, link_style),
             '',
-            Paragraph(reshape_rtl_text(f"ﺮﻗﻢ اﻟﺘﺮﺧﻴﺺ: {certificado.centro_medico.numero_licencia}"), left_content_english3_style) if certificado.centro_medico.numero_licencia else ''
+            ''  # Celda vacía
         ]
-    ]
+    ]   
 
     # Create table with adjusted column widths
     info_table = Table(table_data, colWidths=[outer_col_width, center_col_width, outer_col_width])
@@ -435,6 +449,10 @@ def print_certificate(request, certificado_id):
         ('BOTTOMPADDING', (0, 1), (-1, 1), 1),
         ('TOPPADDING', (0, 2), (-1, 2), 1),
         ('BOTTOMPADDING', (0, 2), (-1, 2), 1),
+
+        ('SPAN', (2, 1), (2, 3)),  # Combinar celdas verticalmente en columna 3
+        ('VALIGN', (2, 1), (2, 3), 'TOP'),  # Alinear verticalmente al centro
+        ('LEADING', (2, 1), (2, 1), 8),  # Aplicar espaciado reducido
     ]))
 
     # Add the table with proper margins
