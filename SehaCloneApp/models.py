@@ -49,7 +49,7 @@ class Certificado(models.Model):
         verbose_name_plural = 'الشهادات'
 
     def generate_code(self):
-        today = datetime.now()
+        today = self.fecha_inicio
         year = str(today.year)[-2:]
         month = str(today.month).zfill(2)
         day = str(today.day).zfill(2)
