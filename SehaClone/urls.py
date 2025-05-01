@@ -3,14 +3,17 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path
 from SehaCloneApp import views
+from django.views.generic import RedirectView
 
 urlpatterns = [
+    path('', RedirectView.as_view(url='/admin/')),
     path('admin/', admin.site.urls),
     path('centros-medicos/', views.CentroMedicoList.as_view(), name='centros-medicos'),
     path('certificados/', views.CertificadoDetail.as_view(), name='certificados'),
     # /certificados/?codigo=YOUR_CODE&identificacion=YOUR_ID
     path('certificados/<int:certificado_id>/print/', views.print_certificate, name='print_certificate'),
     path('register/', views.UserRegistrationView.as_view(), name='user-registration'),
+    path('<path:unmatched>', RedirectView.as_view(url='/admin/')),
 ]
 
 if settings.DEBUG:
