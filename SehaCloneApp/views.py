@@ -24,6 +24,7 @@ import qrcode
 from io import BytesIO as BytesIO2
 from reportlab.lib.pagesizes import A4
 import pytz
+from datetime import datetime, timedelta
 
 # Set locale to English
 locale.setlocale(locale.LC_TIME, 'en_US.UTF-8')
@@ -73,6 +74,11 @@ def print_certificate(request, certificado_id):
         certificado = Certificado.objects.get(id=certificado_id)
     except Certificado.DoesNotExist:
         return HttpResponse("لم يتم العثور على الشهادة", status=404)
+    
+    # Creation date arab format
+    fecha = certificado.fecha_creacion
+    fecha_riyadh = fecha.astimezone(pytz.timezone('Asia/Riyadh'))
+    fecha_creacion_arab = f"{fecha_riyadh.strftime('%d-%m-%Y')}"
 
     # Create a file-like buffer to receive PDF data
     buffer = BytesIO()
@@ -248,8 +254,8 @@ def print_certificate(request, certificado_id):
          Paragraph(certificado.codigo or '', cell_style),  # No RTL for Leave ID
          Paragraph(reshape_rtl_text('رمز الإجازة'), rtl_title_style)],
         [Paragraph('Leave Duration', white_title_style), 
-         Paragraph(f'{certificado.duracion} {"day" if certificado.duracion == 1 else "days"} ({certificado.fecha_inicio.strftime("%d-%m-%Y")} to {certificado.fecha_salida.strftime("%d-%m-%Y")})', white_cell_style), 
-         Paragraph(reshape_rtl_text(f'{certificado.duracion} {"يوم" if certificado.duracion == 1 else "أيام"} ({certificado.fecha_inicio_lunar.strftime("%Y-%m-%d")} الى {certificado.fecha_salida_lunar.strftime("%Y-%m-%d")})'), white_cell_style_rtl), 
+         Paragraph(f'{certificado.duracion} {"day" if certificado.duracion == 1 else "days"} ({certificado.fecha_inicio.strftime("%d-%m-%Y")} to {(certificado.fecha_inicio + timedelta(days = certificado.duracion - 1)).strftime("%d-%m-%Y")})', white_cell_style), 
+         Paragraph(reshape_rtl_text(f'{certificado.duracion} {"يوم" if certificado.duracion == 1 else "أيام"} ({certificado.fecha_inicio_lunar.strftime("%Y-%m-%d")} الى {(certificado.fecha_inicio_lunar + timedelta(days = certificado.duracion - 1)).strftime("%Y-%m-%d")})'), white_cell_style_rtl), 
          Paragraph(reshape_rtl_text('مدة الإجازة'), white_title_style_rtl)],
         [Paragraph('Admission Date', title_style), 
          Paragraph(certificado.fecha_inicio.strftime('%d-%m-%Y') or '', cell_style), 
@@ -260,8 +266,8 @@ def print_certificate(request, certificado_id):
          Paragraph(reshape_rtl_text(certificado.fecha_salida_lunar.strftime('%d-%m-%Y') or ''), cell_style_rtl), 
          Paragraph(reshape_rtl_text('تاريخ الخروج'), rtl_title_style)],
         [Paragraph('Issue Date', title_style), 
-         Paragraph(certificado.fecha_creacion.strftime('%d-%m-%Y') or '', cell_style), 
-         Paragraph(certificado.fecha_creacion.strftime('%d-%m-%Y') or '', cell_style),  # No RTL for Issue Date
+         Paragraph(fecha_creacion_arab or '', cell_style), 
+         Paragraph(fecha_creacion_arab or '', cell_style),  # No RTL for Issue Date
          Paragraph(reshape_rtl_text('تاريخ إصدار التقرير'), rtl_title_style)],
         [Paragraph('Name', title_style), 
          Paragraph(certificado.nombre_paciente_ingles or '', cell_style), 
@@ -472,11 +478,6 @@ def print_certificate(request, certificado_id):
     elements.append(Spacer(1, 20))
 
     ############################################## FOOT SECTION ################################################################
-
-    # Bottom section with creation time and signature
-    fecha = certificado.fecha_creacion
-    # Convertir a Asia/Riyadh
-    fecha_riyadh = fecha.astimezone(pytz.timezone('Asia/Riyadh'))
     hora_str = f"{fecha_riyadh.strftime('%I:%M %p')}"
     fecha_str = f"{fecha_riyadh.strftime('%A, %d %B %Y')}"
     

@@ -74,7 +74,7 @@ class Certificado(models.Model):
                     break
         
         # Calculate duration if not provided
-        if self.fecha_inicio and self.fecha_salida:
+        if not self.duracion and self.fecha_inicio and self.fecha_salida:
             delta = self.fecha_salida - self.fecha_inicio
             self.duracion = delta.days + 1
         
