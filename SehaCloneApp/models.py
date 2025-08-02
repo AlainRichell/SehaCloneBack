@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 import random
 from datetime import datetime
 from hijri_converter import convert
+from django.contrib.auth.models import User
 
 class CentroMedico(models.Model):
     nombre = models.CharField(max_length=100, verbose_name="اسم" )
@@ -10,6 +11,13 @@ class CentroMedico(models.Model):
     numero_licencia = models.CharField(max_length=50, blank=True, null=True, unique=True, db_index=True, verbose_name="رقم الترخيص")
     icono = models.ImageField(upload_to='icons/', verbose_name="ايقون")
     privado = models.BooleanField(default=False, verbose_name="مركز خاص")
+    usuario = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE,
+        verbose_name="المستخدم",
+        null=True,
+        editable=False
+    )
 
     def __str__(self):
         return self.nombre
@@ -43,6 +51,13 @@ class Certificado(models.Model):
     fecha_salida_lunar = models.DateField(verbose_name="تاريخ الانتهاء القمري", blank=True, null=True)
     fecha_creacion = models.DateTimeField(verbose_name="تاريخ الإنشاء")
     duracion = models.IntegerField(blank=True, null=True, verbose_name="مدة")
+    usuario = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE,
+        verbose_name="المستخدم",
+        null=True,
+        editable=False
+    )
 
     class Meta:
         verbose_name = 'شهادة'

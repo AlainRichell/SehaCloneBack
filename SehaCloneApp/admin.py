@@ -11,6 +11,7 @@ admin.site.unregister(Theme)
 @admin.register(CentroMedico)
 class CentroMedicoAdmin(admin.ModelAdmin):
     list_display = ('nombre', 'descripcion', 'privado', 'mostrar_icono')
+    exclude = ('usuario',)
     
     def mostrar_icono(self, obj):
         if obj.icono:
@@ -35,11 +36,23 @@ class CentroMedicoAdmin(admin.ModelAdmin):
     
     search_fields = ('nombre',)
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(usuario=request.user)
+
+    def save_model(self, request, obj, form, change):
+        if not change:
+            obj.usuario = request.user
+        super().save_model(request, obj, form, change)
+
 @admin.register(Certificado)
 class CertificadoAdmin(admin.ModelAdmin):
     list_display = ('codigo', 'nombre_paciente', 'centro_medico', 'fecha_inicio', 'fecha_salida', 'print_certificate')
     search_fields = ('codigo', 'nombre_paciente', 'identificacion')
     readonly_fields = ('codigo', 'fecha_inicio_lunar', 'fecha_salida_lunar')
+    exclude = ('usuario',)
 
     def print_certificate(self, obj):
         url = reverse('print_certificate', args=[obj.id])
@@ -49,3 +62,19 @@ class CertificadoAdmin(admin.ModelAdmin):
         )
     print_certificate.short_description = 'خيارات'
     print_certificate.allow_tags = True
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(usuario=request.user)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "centro_medico":
+            kwargs["queryset"] = CentroMedico.objects.filter(usuario=request.user)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def save_model(self, request, obj, form, change):
+        if not change:
+            obj.usuario = request.user
+        super().save_model(request, obj, form, change)

@@ -48,14 +48,16 @@ class UserRegistrationView(generics.CreateAPIView):
         )
 
 class CentroMedicoList(generics.ListAPIView):
-    queryset = CentroMedico.objects.all()
     serializer_class = CentroMedicoSerializer
+
+    def get_queryset(self):
+        return CentroMedico.objects.filter(usuario=self.request.user)
 
 class CertificadoDetail(generics.RetrieveAPIView):
     serializer_class = CertificadoSerializer
     
     def get_queryset(self):
-        return Certificado.objects.all()
+        return Certificado.objects.filter(usuario=self.request.user)
     
     def get_object(self):
         codigo = self.request.query_params.get('codigo')
@@ -71,7 +73,10 @@ class CertificadoDetail(generics.RetrieveAPIView):
 
 def print_certificate(request, certificado_id):
     try:
-        certificado = Certificado.objects.get(id=certificado_id)
+        certificado = Certificado.objects.get(
+            id=certificado_id,
+            usuario=request.user  # Solo certificados del usuario
+        )
     except Certificado.DoesNotExist:
         return HttpResponse("لم يتم العثور على الشهادة", status=404)
     
