@@ -75,7 +75,6 @@ def print_certificate(request, certificado_id):
     try:
         certificado = Certificado.objects.get(
             id=certificado_id,
-            usuario=request.user  # Solo certificados del usuario
         )
     except Certificado.DoesNotExist:
         return HttpResponse("لم يتم العثور على الشهادة", status=404)
@@ -212,7 +211,7 @@ def print_certificate(request, certificado_id):
     )
 
     # Define verification link
-    REAL_VERIFICATION_LINK = "https://sehaclonefront.onrender.com/leave-query"
+    REAL_VERIFICATION_LINK = f'{settings.CLIENT_URL}/leave-query'
     DISPLAY_VERIFICATION_TEXT = "www.seha.sa/#/inquiries/slenquiry"
 
     def reshape_rtl_text(text):

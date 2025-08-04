@@ -3,8 +3,9 @@ from .models import CentroMedico, Certificado
 from django.utils.html import format_html
 from django.urls import reverse
 from admin_interface.models import Theme
+from django.conf import settings
 
-admin.site.site_url = 'https://sehaclonefront.onrender.com/'
+admin.site.site_url = settings.CLIENT_URL
 
 admin.site.unregister(Theme)
 
